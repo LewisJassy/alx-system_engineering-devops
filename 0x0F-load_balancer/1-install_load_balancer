@@ -24,3 +24,4 @@ echo -e \
 \tserver 144-web-02 144.217.246.199:80 check" \
     >> /etc/haproxy/haproxy.cfg
 service haproxy restart
+
