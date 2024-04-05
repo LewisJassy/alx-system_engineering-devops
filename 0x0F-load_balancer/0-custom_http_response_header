@@ -1,37 +1,28 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2016
-# Set up new nginx server and add custom response header
-# with hostname in new nginx configuration.
+# Customizing a 404-error_page
 
-apt-get update -y && \
-apt-get install -y nginx && \
-echo -e \
-'http {
-    add_header X-Served-By $hostname;
+# Updating Packages before performing installations
+sudo apt-get update
+sudo apt-get install -y nginx
 
-    root /var/www/holberton;
+# Creating an index.html page
+echo "Hello World!" | sudo tee /var/www/html/index.html
 
-    server {
-        listen 80;
-        server_name pearmountain.space;
-        error_page 404 /404_file_not_found.html;
-        rewrite ^/redirect_me/? https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;
-        location / {
-            index index.html;
-        }
-        location /404_file_not_found.html {
-            internal;
-        }
-    }
-}
-events {
-}' > /etc/nginx/nginx.conf
+# Performing a "moved permanently redirection" (301)
+new_string="server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/besthor permanent;"
+sudo sed -i "s/server_name _;/$new_string/" /etc/nginx/sites-enabled/default
 
-mkdir -p /var/www/holberton
+# Creating a 404 Custom error page
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
+new_string="listen 80 default_server;\n\terror_page 404 \/404.html;\n\tlocation = \/404.html {\n\t\troot \/var\/www\/html;\n\t\tinternal;\n\t}"
 
-echo "Holberton School" > \
-    /var/www/holberton/index.html
-echo "Ceci n'est pas une page" > \
-    /var/www/holberton/404_file_not_found.html
+sudo sed -i "s/listen 80 default_server;/$new_string/" /etc/nginx/sites-enabled/default
 
-service nginx restart
+# Creating an HTTP response header
+sudo sed -i "/server_name _/a add_header X-Served-By $HOSTNAME;" /etc/nginx/sites-enabled/default
+
+# Testing configurations for syntax errors
+sudo nginx -t
+
+# Restart nginx after implementing changes
+sudo service nginx restart
