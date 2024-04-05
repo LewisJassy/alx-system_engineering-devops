@@ -2,8 +2,8 @@
 # script to install and setup nginx
 CONFIG_FILE="/etc/nginx/sites-available/default"
 # install nginx
-apt-get -y update
-apt-get -y install nginx
+sudo apt-get -y update
+sudo apt-get -y install nginx
 
 # update index.html file
 echo 'Holberton School' > /usr/share/nginx/html/index.html
