@@ -1,45 +1,35 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+# Displays informtation about subdomains.
 
-# Function to perform DNS record lookup
-lookup_record() {
-  local domain="$1"
-  local subdomain="${2:-}"  # Optional subdomain
+# uncomment for debugging purposes.
+#set -x
 
-  # Build the lookup command
-  local cmd="dig +short @$NAMESERVER"
-  if [[ -n "$subdomain" ]]; then
-    cmd="$cmd $subdomain."
-  fi
-  cmd="$cmd $domain A MX"
+# for the checker to work please remove the colors.
 
-  # Execute the lookup and parse output with awk
-  local output=$(eval "$cmd" | awk '{print $1, $2}')
+# colors
+blue='\e[1;34m'
+brown='\e[0;33m'
+reset='\033[0m'
 
-  # Print results
-  while IFS= read -r record_type destination; do
-    if [[ -n "$destination" ]]; then
-      printf "The subdomain %s%s is a %s record and points to %s\n" "$subdomain"  \
-             "${subdomain:+.}" "$record_type" "$destination"
-    fi
-  done <<< "$output"
+# variables & parameters
+subdomains=( "www" "lb-01" "web-01" "web-02" )
+domain="$1"
+sub="$2"
+
+dig_cmd () {
+	# func variables
+	sub="$2"
+	INFO="$(dig "$sub.$domain" | grep -A1 'ANSWER SECTION:' | awk 'NR==2')"
+	IP=$(echo "$INFO" | awk '{print $5}')
+	RECORD=$(echo "$INFO" | awk '{print $4}')
+
+	echo -e "${brown}The subdomain ${blue}$sub${brown} is a ${blue}$RECORD${brown} record and points to ${blue}$IP${reset}"
 }
 
-# Validate arguments
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <domain> [subdomain]"
-  exit 1
+if [ $# -eq 1 ]; then
+	for subs in "${subdomains[@]}"; do
+		dig_cmd "$domain" "$subs"
+	done
+elif [ $# -eq 2 ]; then
+	dig_cmd "$domain" "$sub"
 fi
-
-domain="$1"
-subdomain="${2:-}"
-
-# Lookup records for specific subdomain or predefined list
-if [[ -n "$subdomain" ]]; then
-  lookup_record "$domain" "$subdomain"
-else
-  lookup_record "$domain" "www"
-  lookup_record "$domain" "lb-01"
-  lookup_record "$domain" "web-01"
-  lookup_record "$domain" "web-02"
-fi
-
