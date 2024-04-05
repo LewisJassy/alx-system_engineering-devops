@@ -1,24 +1,16 @@
 #!/usr/bin/env bash
-# script to install and setup nginx
-CONFIG_FILE="/etc/nginx/sites-available/default"
-# install nginx
-apt-get -y update
-apt-get -y install nginx
+#  A Script that configures a new Ubuntu machine to Perform a 301-redirection
 
-# update index.html file
-echo 'Holberton School' > /usr/share/nginx/html/index.html
+# Upadating Packages before Installations
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# update config file to redirect
-printf %s "server {
-    listen 80;
-    listen [::]:80 default_server;
-    root   /usr/share/nginx/html;
-    index  index.html index.htm;
+# Creating an index.html page
+echo "Hello World!" | sudo tee /var/www/html/index.html
 
-    location /redirect_me {
-        return 301 http://google.com/;
-    }
-}" > $CONFIG_FILE
+# Performing a 301 Redirection
+string_for_replacement="server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/lewisnjaci permanent;"
+sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
 
-# start nginx after reloading config
-service nginx start
+# Restarting Nginx service
+sudo service nginx restart
