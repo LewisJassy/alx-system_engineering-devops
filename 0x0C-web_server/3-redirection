@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-#  A Script that configures a new Ubuntu machine to Perform a 301-redirection
-
-# Upadating Packages before Installations
-sudo apt-get update
-sudo apt-get install -y nginx
+# script to install and setup nginx
+CONFIG_FILE="/etc/nginx/sites-available/default"
+# install nginx
+apt-get -y update
+apt-get -y install nginx
 
 # Creating an index.html page
 echo "Hello World!" | sudo tee /var/www/html/index.html
