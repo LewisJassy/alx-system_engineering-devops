@@ -1,3 +1,45 @@
-1
-2
-3
+#!/bin/bash
+
+# Function to perform DNS record lookup
+lookup_record() {
+  local domain="$1"
+  local subdomain="${2:-}"  # Optional subdomain
+
+  # Build the lookup command
+  local cmd="dig +short @$NAMESERVER"
+  if [[ -n "$subdomain" ]]; then
+    cmd="$cmd $subdomain."
+  fi
+  cmd="$cmd $domain A MX"
+
+  # Execute the lookup and parse output with awk
+  local output=$(eval "$cmd" | awk '{print $1, $2}')
+
+  # Print results
+  while IFS= read -r record_type destination; do
+    if [[ -n "$destination" ]]; then
+      printf "The subdomain %s%s is a %s record and points to %s\n" "$subdomain"  \
+             "${subdomain:+.}" "$record_type" "$destination"
+    fi
+  done <<< "$output"
+}
+
+# Validate arguments
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <domain> [subdomain]"
+  exit 1
+fi
+
+domain="$1"
+subdomain="${2:-}"
+
+# Lookup records for specific subdomain or predefined list
+if [[ -n "$subdomain" ]]; then
+  lookup_record "$domain" "$subdomain"
+else
+  lookup_record "$domain" "www"
+  lookup_record "$domain" "lb-01"
+  lookup_record "$domain" "web-01"
+  lookup_record "$domain" "web-02"
+fi
+
