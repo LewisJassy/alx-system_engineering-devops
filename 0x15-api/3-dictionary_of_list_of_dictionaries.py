@@ -6,31 +6,32 @@ if __name__ == "__main__":
     import requests
     import sys
     base_url = 'https://jsonplaceholder.typicode.com/'
-    try:
-        employee_id = sys.argv[1]
-    except:
-        print('Usage: {} employee_id'.format(sys.argv[0]))
-        exit(1)
 
-    # grab the info about the user
-    url = base_url + 'users?id={}'.format(employee_id)
+    # grab info about all users
+    url = base_url + 'users'
     response = requests.get(url)
-    user = json.loads(response.text)
-    name = user[0].get('name')
+    users = json.loads(response.text)
 
-    # grab the info about the user's tasks
-    url = base_url + 'todos?userId={}'.format(employee_id)
-    response = requests.get(url)
-    objs = json.loads(response.text)
-    completed = 0
-    completed_tasks = []
-    for obj in objs:
-        if obj.get('completed'):
-            completed_tasks.append(obj)
-            completed += 1
+    # grab the info about the users' tasks
+    builder = {}
+    for user in users:
+        employee_id = user.get('id')
+        user_id_key = str(employee_id)
+        username = user.get('username')
+        builder[user_id_key] = []
+        url = base_url + 'todos?userId={}'.format(employee_id)
 
-    # print the output about user's task completion
-    print("{} is done with tasks({}/{}):".format(name, completed, len(objs)))
-    # print the output title of completed tasks
-    for task in completed_tasks:
-        print("\t {}".format(task.get('title')))
+        response = requests.get(url)
+        objs = json.loads(response.text)
+        for obj in objs:
+                json_data = {
+                    "task": obj.get('title'),
+                    "completed": obj.get('completed'),
+                    "username": username
+                }
+                builder[user_id_key].append(json_data)
+
+    # write the data to the file
+    json_encoded_data = json.dumps(builder)
+    with open('todo_all_employees.json', 'w') as myFile:
+        myFile.write(json_encoded_data)
