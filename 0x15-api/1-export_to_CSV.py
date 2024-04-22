@@ -16,8 +16,8 @@ def get_todos_by_userid(user_id):
     todos = requests.get(todo_endpoint, params=payload)
     try:
         return todos.json()
-    except:
-        exit(1)
+    except Exception as e:
+        print(f"Error processing task: {e}")
 
 
 def get_user_by_userid(user_id):
@@ -26,8 +26,8 @@ def get_user_by_userid(user_id):
     user = requests.get(user_endpoint, params=payload)
     try:
         return user.json()[0]
-    except:
-        exit(1)
+    except Exception as e:
+        print(f"Error processing task: {e}")
 
 
 def format_user_todos(user_id):
