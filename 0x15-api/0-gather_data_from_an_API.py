@@ -14,8 +14,8 @@ def get_todos_by_userid(user_id):
     try:
         todos.raise_for_status()
         return todos.json()
-    except:
-        exit(1)
+    except Exception as e:
+        print(f"Error processing task: {e}")
 
 
 def get_user_by_userid(user_id):
@@ -24,8 +24,8 @@ def get_user_by_userid(user_id):
     try:
         user.raise_for_status()
         return user.json()
-    except:
-        exit(1)
+    except Exception as e:
+        print(f"Error processing task: {e}")
 
 
 def format_user_todos(user_id):
