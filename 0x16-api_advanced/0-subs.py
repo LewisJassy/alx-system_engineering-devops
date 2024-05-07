@@ -24,8 +24,12 @@ def number_of_subscribers(subreddit):
         # grab the info about the users' tasks
         data = resp.get('data')
         subscribers = data.get('subscribers')
-    except:
-        return 0
+    except KeyError as e:
+        print(f"KeyError occurred: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
     if subscribers is None:
         return 0
     return int(subscribers)
