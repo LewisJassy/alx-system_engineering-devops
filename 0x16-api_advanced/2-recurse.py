@@ -31,7 +31,11 @@ def recurse(subreddit, hot_list=[]):
         # grab the info about the users' tasks
         data = resp.get('data')
         children = data.get('children')
-    except:
+    except KeyError as e:
+        print(f"KeyError occurred: {e}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
         return None
     if children is None or data is None or len(children) < 1:
         return hot_list
